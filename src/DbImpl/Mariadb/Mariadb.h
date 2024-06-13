@@ -11,24 +11,26 @@
 #include "../../Interfaces/IDbConnection.h"
 #include "../../Interfaces/IDbCommit.h"
 #include "../../Interfaces/IDbTransaction.h"
+#include "../../Model/ConnectionInfoModel.h"
 
 
 class Mariadb : public IDbConnection, public IDbCommit, public IDbTransaction{
 public:
-    Mariadb(std::string connectionString):connectionString(connectionString){};
+    Mariadb(ConnectionInfoModel &connectionInfoModel):connectionInfoModel(connectionInfoModel){};
     ~Mariadb() override;
     bool Connect() override;
     bool Disconnect() override;
     void Commit() override;
     void Rollback() override;
+    bool CheckConnection();
 
     DatafoxTable Query(std::string &queryString) override;
     void Execute(std::string& executeString) override;
 private:
+    ConnectionInfoModel connectionInfoModel;
     MYSQL *conn = mysql_init(NULL);
     MYSQL_RES *result = new MYSQL_RES;
     MYSQL_ROW row;;
-    std::string connectionString;
 };
 
 

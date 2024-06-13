@@ -4,19 +4,19 @@
 
 #ifndef DATAFOX_POSTGRES_H
 #define DATAFOX_POSTGRES_H
-#include "../../Interfaces/IDbConnection.h"
-#include "../../Interfaces/IDbCommit.h"
-#include "../../Interfaces/IDbTransaction.h"
-#include "../../Table/DatafoxTable.h"
-#include "../../Model/ConnectionInfoModel.h"
+#include "../IDbConnection.h"
+#include "../IDbCommit.h"
+#include "../IDbTransaction.h"
+#include "../IDbChangeDb.h"
 #include <pqxx/pqxx>
 #include <string>
 
 
-class Postgres : public IDbConnection, public IDbCommit, public IDbTransaction{
+class Postgres : public IDbConnection, public IDbCommit, public IDbTransaction, public IDbChangeDb{
 public:
-    Postgres(ConnectionInfoModel &connectionInfoModel):connectionInfoModel(connectionInfoModel){};
+    Postgres(std::string connectionString):connectionString(connectionString){};
     ~Postgres() override;
+    bool ChangeDb() override;
     bool Connect() override;
     bool Disconnect() override;
     void Commit() override;
@@ -25,7 +25,7 @@ public:
     DatafoxTable Query(std::string &queryString) override;
     void Execute(std::string& executeString) override;
 private:
-    ConnectionInfoModel connectionInfoModel;
+    std::string connectionString;
     pqxx::connection *c= nullptr;
     pqxx::work *work= nullptr;
 };

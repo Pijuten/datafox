@@ -5,16 +5,29 @@
 #include "Sqlite.h"
 
 #include <iostream>
-#include "../../Table/DatafoxTable.h"
+#include "../DatafoxTable.h"
 
 Sqlite::~Sqlite() {
     delete work;
     delete c;
 }
 
+bool Sqlite::ChangeDb() {
+    try {
+        delete work;
+        delete c;
+        c = new SQLite::Database(connectionString, SQLite::OPEN_READWRITE);
+        work = new SQLite::Transaction(*c);
+        return true;
+    } catch (std::exception const &e) {
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
+}
+
 bool Sqlite::Connect() {
     try {
-        c = new SQLite::Database(connectionInfoModel.getFilePath(), SQLite::OPEN_READWRITE);
+        c = new SQLite::Database(connectionString, SQLite::OPEN_READWRITE);
         work = new SQLite::Transaction(*c);
         return true;
     } catch (std::exception const &e) {

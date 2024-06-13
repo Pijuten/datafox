@@ -3,7 +3,7 @@
 //
 
 #include "Postgres.h"
-#include "../../Table/DatafoxTable.h"
+#include "../DatafoxTable.h"
 #include <iostream>
 
 bool Postgres::Disconnect() {
@@ -33,12 +33,7 @@ void Postgres::Rollback() {
 
 bool Postgres::Connect() {
     try {
-        c = new pqxx::connection{
-                "username="+connectionInfoModel.getUser()+
-                "host="+connectionInfoModel.getHost()+
-                "password="+connectionInfoModel.getPassword()+
-                "dbname="+connectionInfoModel.getDb()
-        };
+        c = new pqxx::connection{connectionString};
         if (c->is_open()) {
             work = new pqxx::work(*c);
             return true;
@@ -55,6 +50,18 @@ Postgres::~Postgres() {
     delete c;
 }
 
+bool Postgres::ChangeDb() {
+    delete work;
+    delete c;
+    try {
+        c=new pqxx::connection();
+        return true;
+    }catch (std::exception const& e) {
+        std::cout<<e.what()<<std::endl;
+        return false;
+    }
+}
+
 DatafoxTable Postgres::Query(std::string &queryString) {
     if (work!= nullptr) {
         DatafoxTable datafox_table;
@@ -67,7 +74,7 @@ DatafoxTable Postgres::Query(std::string &queryString) {
             std::vector<std::string> rowData;
             if (columnIndex == 0) { // Only collect column names once
                 for (auto const &field : row) {
-                    rowData.emplace_back(field.name()); // Assuming field.name() gives the column name
+                    rowData.push_back(field.name()); // Assuming field.name() gives the column name
                 }
                 datafox_table.AddRow(rowData);
                 rowData.clear();
@@ -75,7 +82,7 @@ DatafoxTable Postgres::Query(std::string &queryString) {
             }
             for (auto const &field : row) {
                 if (field.is_null()) {
-                    rowData.emplace_back("null"); // Handle NULL by pushing an empty string or any default value
+                    rowData.push_back("null"); // Handle NULL by pushing an empty string or any default value
                 } else {
                     rowData.push_back(field.as<std::string>());
                 }

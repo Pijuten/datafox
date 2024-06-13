@@ -4,17 +4,17 @@
 
 #ifndef SQLITE_H
 #define SQLITE_H
-#include "../../Interfaces/IDbCommit.h"
-#include "../../Interfaces/IDbConnection.h"
-#include "../../Interfaces/IDbTransaction.h"
-#include "../../Table/DatafoxTable.h"
+#include "../IDbCommit.h"
+#include "../IDbConnection.h"
+#include "../IDbTransaction.h"
+#include "../IDbChangeDb.h"
 #include "SQLiteCpp/SQLiteCpp.h"
-#include "../../Model/ConnectionInfoModel.h"
 
-class Sqlite : public IDbConnection,IDbCommit, IDbTransaction{
+class Sqlite : public IDbConnection,IDbCommit, IDbTransaction, IDbChangeDb{
 public:
     ~Sqlite() override;
-    Sqlite(ConnectionInfoModel &connectionInfoModel):connectionInfoModel(connectionInfoModel){};
+    Sqlite(std::string connectionString):connectionString(connectionString){};
+    bool ChangeDb() override;
     bool Connect() override;
     bool Disconnect() override;
     void Commit() override;
@@ -23,7 +23,7 @@ public:
     DatafoxTable Query(std::string &queryString) override;
     void Execute(std::string& executeString) override;
 private:
-    ConnectionInfoModel connectionInfoModel;
+    std::string connectionString;
     SQLite::Database*c = nullptr;
     SQLite::Transaction *work = nullptr;
 };
