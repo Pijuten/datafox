@@ -5,6 +5,16 @@
 #include "../../src/DbImpl/Mariadb/Mariadb.h"
 
 TEST(Mariadb, test1) {
+    ConnectionInfoModel connectionInfoModel;
+    connectionInfoModel.setHost("localhost");
+    connectionInfoModel.setPort(3306);
+    connectionInfoModel.setUser("test");
+    connectionInfoModel.setPassword("test");
+    connectionInfoModel.setDb("test");
+    connectionInfoModel.setUnixSocket("");
+    Mariadb db(connectionInfoModel);
+    db.Connect();
+    EXPECT_TRUE(db.CheckConnection());
 }
 TEST(Mariadb_test, test2) {
     ConnectionInfoModel connectionInfoModel;
@@ -16,4 +26,5 @@ TEST(Mariadb_test, test2) {
     connectionInfoModel.setUnixSocket("");
     Mariadb db(connectionInfoModel);
     EXPECT_TRUE(db.Connect());
+    db.Disconnect();
 }
